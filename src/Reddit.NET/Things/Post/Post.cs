@@ -325,9 +325,18 @@ namespace Reddit.Things
 
         [JsonProperty("is_video")]
         public bool IsVideo { get; set; }
-
+        
         [JsonProperty("sr_detail")]
         public Subreddit SrDetail { get; set; }
+
+        [JsonProperty("is_gallery")]
+        public bool IsGallery { get; set; }
+
+        [JsonProperty("media_metadata")]
+        public Dictionary<String, MediaMetadataItem> MediaMetadata { get; set; }
+
+        
+
 
         public Post(Controllers.Post post)
         {
@@ -382,5 +391,11 @@ namespace Reddit.Things
         }
 
         public Post() { }
+
+
+
+
+
+
     }
 }
