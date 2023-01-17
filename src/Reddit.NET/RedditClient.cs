@@ -44,7 +44,7 @@ namespace Reddit
         {
             get
             {
-                
+
                 return (FrontPageaLastUpdated.HasValue
                     && FrontPageaLastUpdated.Value.AddSeconds(15) > DateTime.Now ? frontPage : GetFrontPage());
             }
@@ -77,7 +77,7 @@ namespace Reddit
                 || !string.IsNullOrWhiteSpace(accessToken))
             {
                 // Passing "null" instead of null forces the Reddit API to return a non-200 status code on auth failure, freeing us from having to parse the content string.  --Kris
-                Models = new Dispatch(appId, appSecret, refreshToken, (!string.IsNullOrWhiteSpace(accessToken) ? accessToken : "null"), new RestClient("https://oauth.reddit.com"), 
+                Models = new Dispatch(appId, appSecret, refreshToken, (!string.IsNullOrWhiteSpace(accessToken) ? accessToken : "null"), new RestClient("https://oauth.reddit.com"),
                     userAgent: userAgent);
             }
             else
@@ -351,7 +351,7 @@ namespace Reddit
             string submitLinkLabel = null, string submitTextLabel = null, bool wikiEnabled = false, bool over18 = false,
             bool allowDiscovery = true, bool allowSpoilers = true, bool showMedia = true, bool showMediaPreview = true,
             bool allowImages = true, bool allowVideos = true, bool collapseDeletedComments = false, string suggestedCommentSort = null,
-            int commentScoreHideMins = 0, byte[] headerImage = null, byte[] iconImage = null, string primaryColor = null, string keyColor = null, 
+            int commentScoreHideMins = 0, byte[] headerImage = null, byte[] iconImage = null, string primaryColor = null, string keyColor = null,
             string fullname = null)
         {
             return new Subreddit(Models, name, title, description, sidebar, submissionText, lang, subredditType, submissionType, submitLinkLabel, submitTextLabel,
@@ -371,11 +371,23 @@ namespace Reddit
         /// <summary>
         /// Get a listing of posts by fullname.
         /// </summary>
-        /// <param name="fullnames">A list of post fullnames</param>
+        /// <param name="fullnames"></param>
         /// <returns>A list of populated posts.</returns>
+        /// <exception cref="TooManyPostsRequestedException">protects against lost requests. triggered if posts is over 25</exception>
         public List<Post> GetPosts(List<string> fullnames)
         {
+
+            if (fullnames.Count > 25) { throw new TooManyPostsRequestedException("no more than 25 posts can be requested at once by id"); }
             return Account.Lists.GetPosts(Account.Validate(Models.Listings.GetByNames(string.Join(",", fullnames))), Models);
+        }
+
+        /// <summary>
+        /// An exception for when more posts are requested than can be handled without data loss
+        /// </summary>
+        internal class TooManyPostsRequestedException : Exception {
+
+            public TooManyPostsRequestedException(String message) : base(message)
+            {}
         }
 
         /// <summary>
